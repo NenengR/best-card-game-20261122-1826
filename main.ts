@@ -1,4 +1,4 @@
-// Hand-in contract (Node 22+, standard library only):
+// Hand-in contract for EMBERWEAVE (Node 22+, standard library only):
 //   - The entry is the static game in ./game/ and the real browser renders in ./screenshots/.
 //   - MAKEFUN_OUTPUT_DIR (default /output) receives exactly three things: game/, screenshots/
 //     and dossier.json. No build step, no network and no other output are needed.
