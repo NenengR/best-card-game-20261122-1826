@@ -19,13 +19,18 @@ const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 // Recursively grant write permission to an output tree. Also called before a copy:
 // an existing 0444 destination file would otherwise make cpSync fail with EACCES.
 function makeWritable(dir) {
+  // /output may be owned by root; a non-owner cannot chmod it (EPERM). Ignore permission
+  // errors: files this program creates itself it owns, so those chmods still succeed.
+  const tolerate = (err) => ['ENOENT', 'EPERM', 'EACCES'].includes(err.code);
   try { chmodSync(dir, 0o755); }
-  catch (err) { if (err.code !== 'ENOENT') throw err; }
+  catch (err) { if (!tolerate(err)) throw err; }
   if (!existsSync(dir)) return;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const p = join(dir, entry.name);
-    if (entry.isDirectory()) makeWritable(p);
-    else chmodSync(p, 0o644);
+    try {
+      if (entry.isDirectory()) makeWritable(p);
+      else chmodSync(p, 0o644);
+    } catch (err) { if (!tolerate(err)) throw err; }
   }
 }
 
